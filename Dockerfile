@@ -31,7 +31,8 @@ RUN adduser --disabled-password --gecos '' appuser \
     && chown -R appuser:appuser /app
 USER appuser
 
-# Static files will be collected at runtime
+# Create staticfiles directory with proper permissions
+RUN mkdir -p /app/staticfiles && chmod 755 /app/staticfiles
 
 # Expose port
 EXPOSE 8000
