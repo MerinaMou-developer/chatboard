@@ -9,7 +9,7 @@ class Webhook(models.Model):
     """Webhook configuration for organizations."""
     org = models.ForeignKey('orgs.Organization', on_delete=models.CASCADE, related_name='webhooks')
     url = models.URLField(max_length=500)
-    secret = models.CharField(max_length=64, default=lambda: secrets.token_urlsafe(32))
+    secret = models.CharField(max_length=64, blank=True)
     events = models.JSONField(default=list)  # List of event types to subscribe to
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -23,6 +23,11 @@ class Webhook(models.Model):
     
     def __str__(self):
         return f"Webhook {self.id} for {self.org.name}"
+    
+    def save(self, *args, **kwargs):
+        if not self.secret:
+            self.secret = secrets.token_urlsafe(32)
+        super().save(*args, **kwargs)
 
 
 class WebhookOutbox(models.Model):
