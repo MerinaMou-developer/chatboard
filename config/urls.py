@@ -15,18 +15,47 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
 from django.urls import path, include
-from django.http import JsonResponse
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from django.http import JsonResponse
+from rest_framework.routers import DefaultRouter
+from rooms.api.base.views import RoomViewSet
+from messages_app.api.base.views import RoomMessageListCreateView
+from orgs.api.base.views import OrganizationViewSet
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-def live(_): return JsonResponse({"status": "ok"})
-def ready(_): return JsonResponse({"status": "ok"})  # later: ping DB/Redis
+def live(_):  return JsonResponse({"status": "ok"})
+def ready(_): return JsonResponse({"status": "ok"})
+
+router = DefaultRouter()
+router.register(r"rooms", RoomViewSet, basename="rooms")
+router.register(r"orgs", OrganizationViewSet, basename="orgs")
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-     path("health/live", live),
+    path("admin/", admin.site.urls),
+    path("health/live", live),
     path("health/ready", ready),
+
+    # JWT
+    path("auth/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+
+    # API schema & docs
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema")),
+
+    # API endpoints
+    path("api/", include(router.urls)),
+
+    # Messages (nested)
+    path("api/rooms/<int:room_id>/messages", RoomMessageListCreateView.as_view(), name="room-messages"),
+
+    # File uploads
+    path("api/uploads/", include("uploads.urls")),
+
+    # Webhooks
+    path("", include("webhooks.urls")),
+
+    # Auth endpoints
+    path("auth/", include("accounts.api.v1.urls")),  # /auth/register, /auth/me
 ]

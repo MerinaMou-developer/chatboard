@@ -16,11 +16,14 @@ from django.urls import path
 from rooms.consumers import RoomConsumer  # create file now
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+
 django_asgi_app = get_asgi_application()
+
+websocket_urlpatterns = [
+    path("ws/rooms/<int:room_id>/", RoomConsumer.as_asgi()),
+]
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
-    "websocket": AuthMiddlewareStack(URLRouter([
-        path("ws/rooms/<int:room_id>/", RoomConsumer.as_asgi()),
-    ])),
+    "websocket": AuthMiddlewareStack(URLRouter(websocket_urlpatterns)),
 })
