@@ -1,61 +1,41 @@
-"""
-URL configuration for config project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import include, path, re_path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from django.http import JsonResponse
-from rest_framework.routers import DefaultRouter
-from rooms.api.base.views import RoomViewSet
-from messages_app.api.base.views import RoomMessageListCreateView
-from orgs.api.base.views import OrganizationViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 def live(_):  return JsonResponse({"status": "ok"})
 def ready(_): return JsonResponse({"status": "ok"})
 
-router = DefaultRouter()
-router.register(r"rooms", RoomViewSet, basename="rooms")
-router.register(r"orgs", OrganizationViewSet, basename="orgs")
+# --- v1 patterns (all versioned) ---
+api_v1_patterns = [
+    path("auth/", include("accounts.api.v1.urls")),
+    path("orgs/", include("orgs.api.v1.urls")),
+    path("rooms/", include("rooms.api.v1.urls")),
+    path("messages/", include("messages_app.api.v1.urls")),
+    path("uploads/", include("uploads.api.v1.urls")),         # versioned
+    path("webhooks/", include("webhooks.api.v1.urls")),       # versioned
+    path("notifications/", include("notifications.api.v1.urls")),  # versioned
+
+    # JWT under v1
+    path("auth/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+]
+
+def api_version_not_found(request, version, *args, **kwargs):
+    return JsonResponse({"detail": f"Unknown API version: {version}"}, status=404)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("health/live", live),
     path("health/ready", ready),
 
-    # JWT
-    path("auth/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
-
-    # API schema & docs
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema")),
 
-    # API endpoints
-    path("api/", include(router.urls)),
+    # Only here; no legacy '', no 'api/'
+    path("api/v1/", include(api_v1_patterns)),
 
-    # Messages (nested)
-    path("api/rooms/<int:room_id>/messages", RoomMessageListCreateView.as_view(), name="room-messages"),
-
-    # File uploads
-    path("api/uploads/", include("uploads.urls")),
-
-    # Webhooks
-    path("", include("webhooks.urls")),
-
-    # Auth endpoints
-    path("auth/", include("accounts.api.v1.urls")),  # /auth/register, /auth/me
+    # Optional: return 404 for future versions until implemented
+    re_path(r"^api/(?P<version>v[0-9]+)/", api_version_not_found),
 ]

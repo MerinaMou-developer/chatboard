@@ -15,8 +15,8 @@ All services are healthy:
 
 ## 📋 API Documentation
 
-- **Swagger UI**: http://localhost:8000/api/schema/swagger-ui/
-- **ReDoc**: http://localhost:8000/api/schema/redoc/
+- **Swagger UI**: http://localhost:8000/api/docs/
+- **API Schema**: http://localhost:8000/api/schema/
 - **Admin Panel**: http://localhost:8000/admin/
 
 ---
@@ -39,22 +39,17 @@ Content-Type: application/json
 **Expected Response:**
 ```json
 {
-    "user": {
-        "id": 1,
-        "email": "test@example.com",
-        "first_name": "Test",
-        "last_name": "User"
-    },
-    "tokens": {
-        "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
-        "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
-    }
+    "id": 5,
+    "email": "test@example.com",
+    "first_name": "Test",
+    "last_name": "User",
+    "avatar_url": null
 }
 ```
 
 ### 1.2 User Login
 ```bash
-POST http://localhost:8000/api/v1/auth/login/
+POST http://localhost:8000/api/v1/auth/token/
 Content-Type: application/json
 
 {
@@ -73,7 +68,7 @@ Content-Type: application/json
 
 ### 1.3 Get User Profile
 ```bash
-GET http://localhost:8000/api/v1/auth/profile/
+GET http://localhost:8000/api/v1/auth/me/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 ```
 
@@ -83,7 +78,7 @@ Authorization: Bearer YOUR_ACCESS_TOKEN
 
 ### 2.1 Create Organization
 ```bash
-POST http://localhost:8000/api/v1/organizations/
+POST http://localhost:8000/api/v1/orgs/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
@@ -103,25 +98,25 @@ Content-Type: application/json
 
 ### 2.2 List User's Organizations
 ```bash
-GET http://localhost:8000/api/v1/organizations/
+GET http://localhost:8000/orgs/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 ```
 
 ### 2.3 Get Organization Details
 ```bash
-GET http://localhost:8000/api/v1/organizations/1/
+GET http://localhost:8000/orgs/1/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 ```
 
 ### 2.4 List Organization Members
 ```bash
-GET http://localhost:8000/api/v1/organizations/1/members/
+GET http://localhost:8000/orgs/1/members/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 ```
 
 ### 2.5 Invite User to Organization
 ```bash
-POST http://localhost:8000/api/v1/organizations/1/invite/
+POST http://localhost:8000/orgs/1/invite/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
@@ -143,7 +138,7 @@ Content-Type: application/json
 
 ### 2.6 Accept Organization Invite
 ```bash
-POST http://localhost:8000/api/v1/organizations/accept-invite/
+POST http://localhost:8000/orgs/accept-invite/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
@@ -158,7 +153,7 @@ Content-Type: application/json
 
 ### 3.1 Create Chat Room
 ```bash
-POST http://localhost:8000/api/v1/rooms/
+POST http://localhost:8000/rooms/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
@@ -183,19 +178,19 @@ Content-Type: application/json
 
 ### 3.2 List Organization Rooms
 ```bash
-GET http://localhost:8000/api/v1/rooms/?org=1
+GET http://localhost:8000/rooms/?org=1
 Authorization: Bearer YOUR_ACCESS_TOKEN
 ```
 
 ### 3.3 Get Room Details
 ```bash
-GET http://localhost:8000/api/v1/rooms/1/
+GET http://localhost:8000/rooms/1/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 ```
 
 ### 3.4 Join Room
 ```bash
-POST http://localhost:8000/api/v1/rooms/1/join/
+POST http://localhost:8000/rooms/1/join/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 ```
 
@@ -205,13 +200,12 @@ Authorization: Bearer YOUR_ACCESS_TOKEN
 
 ### 4.1 Send Message
 ```bash
-POST http://localhost:8000/api/v1/messages/
+POST http://localhost:8000/messages/rooms/1/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
 {
-    "room": 1,
-    "content": "Hello everyone!",
+    "body": "Hello everyone!",
     "message_type": "text"
 }
 ```
@@ -222,7 +216,7 @@ Content-Type: application/json
     "id": 1,
     "room": 1,
     "sender": 1,
-    "content": "Hello everyone!",
+    "body": "Hello everyone!",
     "message_type": "text",
     "created_at": "2025-10-21T15:30:00Z"
 }
@@ -230,19 +224,18 @@ Content-Type: application/json
 
 ### 4.2 Get Room Messages
 ```bash
-GET http://localhost:8000/api/v1/messages/?room=1
+GET http://localhost:8000/messages/rooms/1/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 ```
 
 ### 4.3 Send Message with File
 ```bash
-POST http://localhost:8000/api/v1/messages/
+POST http://localhost:8000/messages/rooms/1/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
 {
-    "room": 1,
-    "content": "Check out this file!",
+    "body": "Check out this file!",
     "message_type": "file",
     "file_url": "https://example.com/file.pdf"
 }
@@ -254,7 +247,7 @@ Content-Type: application/json
 
 ### 5.1 Get Presigned Upload URL
 ```bash
-POST http://localhost:8000/api/uploads/presigned/
+POST http://localhost:8000/uploads/presign/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
@@ -277,7 +270,7 @@ Content-Type: application/json
 
 ### 5.2 List User's Uploads
 ```bash
-GET http://localhost:8000/api/uploads/
+GET http://localhost:8000/uploads/my-uploads/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 ```
 
@@ -287,7 +280,7 @@ Authorization: Bearer YOUR_ACCESS_TOKEN
 
 ### 6.1 Create Webhook
 ```bash
-POST http://localhost:8000/api/v1/webhooks/
+POST http://localhost:8000/webhooks/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
@@ -300,7 +293,24 @@ Content-Type: application/json
 
 ### 6.2 List Organization Webhooks
 ```bash
-GET http://localhost:8000/api/v1/webhooks/?org=1
+GET http://localhost:8000/webhooks/?org=1
+Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+### 6.3 Test Webhook
+```bash
+POST http://localhost:8000/webhooks/1/test/
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+    "test_data": {"message": "Test webhook"}
+}
+```
+
+### 6.4 Get Webhook Events
+```bash
+GET http://localhost:8000/webhooks/1/events/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 ```
 
@@ -311,13 +321,13 @@ Authorization: Bearer YOUR_ACCESS_TOKEN
 ### Using cURL
 ```bash
 # Example: Register a user
-curl -X POST http://localhost:8000/api/v1/auth/register/ \
+curl -X POST http://localhost:8000/auth/register/ \
   -H "Content-Type: application/json" \
   -d '{"email": "test@example.com", "password": "testpass123", "first_name": "Test", "last_name": "User"}'
 ```
 
 ### Using Postman
-1. Import the API collection from Swagger: http://localhost:8000/api/schema/swagger-ui/
+1. Import the API collection from Swagger: http://localhost:8000/api/docs/
 2. Set base URL: `http://localhost:8000`
 3. Add Authorization header: `Bearer YOUR_TOKEN`
 
@@ -326,7 +336,7 @@ curl -X POST http://localhost:8000/api/v1/auth/register/ \
 import requests
 
 # Register user
-response = requests.post('http://localhost:8000/api/v1/auth/register/', json={
+response = requests.post('http://localhost:8000/auth/register/', json={
     'email': 'test@example.com',
     'password': 'testpass123',
     'first_name': 'Test',
@@ -338,7 +348,7 @@ access_token = response.json()['tokens']['access']
 
 # Use token for authenticated requests
 headers = {'Authorization': f'Bearer {access_token}'}
-response = requests.get('http://localhost:8000/api/v1/organizations/', headers=headers)
+response = requests.get('http://localhost:8000/orgs/', headers=headers)
 ```
 
 ---

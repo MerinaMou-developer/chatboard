@@ -85,8 +85,20 @@ REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
     "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.UserRateThrottle"],
     "DEFAULT_THROTTLE_RATES": {"user": "100/min"},
+
+    # 🔥 Key change: version comes from URL like /api/v1/...
+    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.URLPathVersioning",
+    "DEFAULT_VERSION": "v1",
+    "ALLOWED_VERSIONS": ("v1",),       # add 'v2' later
+    "VERSION_PARAM": "version",
 }
-SPECTACULAR_SETTINGS = {"TITLE": "ChatBoard API", "VERSION": "0.1"}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "ChatBoard API",
+    "VERSION": "v1",
+    "SERVERS": [{"url": "/api/v1", "description": "v1"}],
+}
+
 
 # ---- DB (Docker) ----
 DB_NAME = os.getenv("POSTGRES_DB", "chatboard")
