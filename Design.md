@@ -54,50 +54,63 @@
 
 ### **Authentication Endpoints**
 ```http
-POST /auth/register/              # User registration
-POST /auth/token/                 # Login (JWT tokens)
-POST /auth/token/refresh/         # Refresh access token
-GET  /auth/me/                    # Current user profile
-PATCH /auth/me/                   # Update user profile
-GET  /auth/me/unread-counts/      # Unread message counts
+POST /api/v1/auth/register/              # User registration
+POST /api/v1/auth/token/                 # Login (JWT tokens)
+POST /api/v1/auth/token/refresh/         # Refresh access token
+GET  /api/v1/auth/me/                    # Current user profile
+PATCH /api/v1/auth/me/                   # Update user profile
+GET  /api/v1/auth/me/unread-counts/      # Unread message counts
 ```
 
 ### **Organization Management**
 ```http
-GET    /api/orgs/                          # List user's organizations
-POST   /api/orgs/                          # Create organization
-GET    /api/orgs/{id}/members/             # List organization members
-POST   /api/orgs/{id}/invite/              # Invite user to organization
-POST   /api/orgs/accept-invite/            # Accept organization invitation
-POST   /api/orgs/{id}/members/{user_id}/role/  # Change member role
+GET    /api/v1/orgs/                          # List user's organizations
+POST   /api/v1/orgs/                          # Create organization
+GET    /api/v1/orgs/{id}/members/             # List organization members
+POST   /api/v1/orgs/{id}/invite/              # Invite user to organization
+POST   /api/v1/orgs/accept-invite/            # Accept organization invitation
+POST   /api/v1/orgs/{id}/members/{user_id}/role/  # Change member role
 ```
 
 ### **Room Management**
 ```http
-GET    /api/rooms/                         # List user's rooms
-POST   /api/rooms/                         # Create room (MANAGER/ADMIN)
-GET    /api/rooms/{id}/members/            # List room members
-POST   /api/rooms/{id}/read/{msg_id}/      # Mark messages as read
+GET    /api/v1/rooms/                         # List user's rooms
+POST   /api/v1/rooms/                         # Create room (MANAGER/ADMIN)
+GET    /api/v1/rooms/{id}/                    # Get room details
+POST   /api/v1/rooms/{id}/join/               # Join a room
+POST   /api/v1/rooms/{id}/leave/              # Leave a room
+GET    /api/v1/rooms/{id}/members/            # List room members
+POST   /api/v1/rooms/{id}/read/{msg_id}/      # Mark messages as read
 ```
 
 ### **Messaging**
 ```http
-GET  /api/rooms/{id}/messages/            # List messages (paginated)
-POST /api/rooms/{id}/messages/            # Send message
+GET  /api/v1/messages/rooms/{room_id}/    # List messages (paginated)
+POST /api/v1/messages/rooms/{room_id}/    # Send message
 ```
 
 ### **File Management**
 ```http
-POST /api/uploads/presign/                # Get presigned upload URL
-GET  /api/uploads/my-uploads/             # List user's uploaded files
+POST /api/v1/uploads/presign/            # Get presigned upload URL
+GET  /api/v1/uploads/my-uploads/         # List user's uploaded files
 ```
 
 ### **Webhook Management**
 ```http
-GET    /api/webhooks/                     # List organization webhooks
-POST   /api/webhooks/                     # Create webhook
-GET    /api/webhooks/{id}/events/         # List webhook delivery events
-POST   /api/webhooks/{id}/test/           # Send test webhook
+GET    /api/v1/webhooks/                 # List organization webhooks
+POST   /api/v1/webhooks/                 # Create webhook
+GET    /api/v1/webhooks/{id}/            # Get webhook details
+POST   /api/v1/webhooks/{id}/test/       # Send test webhook
+GET    /api/v1/webhooks/{id}/events/     # List webhook delivery events
+```
+
+### **Notification Management**
+```http
+GET    /api/v1/notifications/            # List user notifications
+GET    /api/v1/notifications/{id}/       # Get notification details
+PATCH  /api/v1/notifications/{id}/       # Mark notification as read
+POST   /api/v1/notifications/mark-all-read/  # Mark all as read
+GET    /api/v1/notifications/unread-count/   # Get unread count
 ```
 
 ### **WebSocket Endpoints**

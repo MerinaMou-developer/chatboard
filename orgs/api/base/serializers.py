@@ -21,6 +21,7 @@ class InviteCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrganizationInvite
         fields = ["id", "org", "email", "role"]
+        read_only_fields = ["id", "org"]  # org comes from URL path parameter
 
     def validate(self, attrs):
         attrs = super().validate(attrs)

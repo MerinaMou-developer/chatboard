@@ -96,7 +96,7 @@ REST_FRAMEWORK = {
 SPECTACULAR_SETTINGS = {
     "TITLE": "ChatBoard API",
     "VERSION": "v1",
-    "SERVERS": [{"url": "/api/v1", "description": "v1"}],
+    "SERVERS": [{"url": "http://127.0.0.1:8000", "description": "Local Development"}],
 }
 
 

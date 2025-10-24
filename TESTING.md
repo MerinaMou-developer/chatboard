@@ -138,7 +138,7 @@ Content-Type: application/json
 
 ### 2.6 Accept Organization Invite
 ```bash
-POST http://localhost:8000/orgs/accept-invite/
+POST http://localhost:8000/api/v1/orgs/accept-invite/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
@@ -153,13 +153,13 @@ Content-Type: application/json
 
 ### 3.1 Create Chat Room
 ```bash
-POST http://localhost:8000/rooms/
+POST http://localhost:8000/api/v1/rooms/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
 {
     "name": "General Chat",
-    "description": "General discussion room",
+    "is_dm": false,
     "org": 1
 }
 ```
@@ -169,28 +169,55 @@ Content-Type: application/json
 {
     "id": 1,
     "name": "General Chat",
-    "description": "General discussion room",
+    "is_dm": false,
     "org": 1,
     "created_at": "2025-10-21T15:30:00Z",
-    "created_by": 1
+    "created_by": 1,
+    "members_count": 1
 }
 ```
 
-### 3.2 List Organization Rooms
+### 3.2 List Your Rooms
 ```bash
-GET http://localhost:8000/rooms/?org=1
+GET http://localhost:8000/api/v1/rooms/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 ```
 
 ### 3.3 Get Room Details
 ```bash
-GET http://localhost:8000/rooms/1/
+GET http://localhost:8000/api/v1/rooms/1/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 ```
 
 ### 3.4 Join Room
 ```bash
-POST http://localhost:8000/rooms/1/join/
+POST http://localhost:8000/api/v1/rooms/1/join/
+Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+**Expected Response:**
+```json
+{
+    "detail": "Successfully joined the room"
+}
+```
+
+### 3.5 Leave Room
+```bash
+POST http://localhost:8000/api/v1/rooms/1/leave/
+Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+**Expected Response:**
+```json
+{
+    "detail": "Successfully left the room"
+}
+```
+
+### 3.6 List Room Members
+```bash
+GET http://localhost:8000/api/v1/rooms/1/members/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 ```
 
@@ -200,13 +227,13 @@ Authorization: Bearer YOUR_ACCESS_TOKEN
 
 ### 4.1 Send Message
 ```bash
-POST http://localhost:8000/messages/rooms/1/
+POST http://localhost:8000/api/v1/messages/rooms/1/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
 {
     "body": "Hello everyone!",
-    "message_type": "text"
+    "file_url": null
 }
 ```
 
@@ -214,30 +241,33 @@ Content-Type: application/json
 ```json
 {
     "id": 1,
+    "org": 1,
     "room": 1,
     "sender": 1,
     "body": "Hello everyone!",
-    "message_type": "text",
+    "file_url": null,
+    "is_deleted": false,
     "created_at": "2025-10-21T15:30:00Z"
 }
 ```
 
 ### 4.2 Get Room Messages
 ```bash
-GET http://localhost:8000/messages/rooms/1/
+GET http://localhost:8000/api/v1/messages/rooms/1/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 ```
 
+**Response:** Paginated list of messages
+
 ### 4.3 Send Message with File
 ```bash
-POST http://localhost:8000/messages/rooms/1/
+POST http://localhost:8000/api/v1/messages/rooms/1/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
 {
     "body": "Check out this file!",
-    "message_type": "file",
-    "file_url": "https://example.com/file.pdf"
+    "file_url": "https://your-s3-bucket.s3.amazonaws.com/uploads/file.pdf"
 }
 ```
 
@@ -247,7 +277,7 @@ Content-Type: application/json
 
 ### 5.1 Get Presigned Upload URL
 ```bash
-POST http://localhost:8000/uploads/presign/
+POST http://localhost:8000/api/v1/uploads/presign/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
@@ -270,7 +300,7 @@ Content-Type: application/json
 
 ### 5.2 List User's Uploads
 ```bash
-GET http://localhost:8000/uploads/my-uploads/
+GET http://localhost:8000/api/v1/uploads/my-uploads/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 ```
 
@@ -280,38 +310,91 @@ Authorization: Bearer YOUR_ACCESS_TOKEN
 
 ### 6.1 Create Webhook
 ```bash
-POST http://localhost:8000/webhooks/
+POST http://localhost:8000/api/v1/webhooks/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
 {
     "org": 1,
     "url": "https://your-webhook-endpoint.com/webhook",
-    "events": ["message.created", "room.created"]
+    "events": ["message.created", "room.created"],
+    "is_active": true
 }
 ```
 
 ### 6.2 List Organization Webhooks
 ```bash
-GET http://localhost:8000/webhooks/?org=1
+GET http://localhost:8000/api/v1/webhooks/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 ```
 
 ### 6.3 Test Webhook
 ```bash
-POST http://localhost:8000/webhooks/1/test/
+POST http://localhost:8000/api/v1/webhooks/1/test/
+Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+**Expected Response:**
+```json
+{
+    "detail": "Test webhook queued for delivery",
+    "outbox_id": 1,
+    "webhook_url": "https://your-webhook-endpoint.com/webhook"
+}
+```
+
+### 6.4 List Webhook Events
+```bash
+GET http://localhost:8000/api/v1/webhooks/1/events/
+Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+**Response:** List of webhook delivery attempts with status and retry information
+
+---
+
+## 🔔 Step 7: Notifications
+
+### 7.1 List User Notifications
+```bash
+GET http://localhost:8000/api/v1/notifications/
+Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+### 7.2 Get Notification Details
+```bash
+GET http://localhost:8000/api/v1/notifications/1/
+Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+### 7.3 Mark Notification as Read
+```bash
+PATCH http://localhost:8000/api/v1/notifications/1/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
 {
-    "test_data": {"message": "Test webhook"}
+    "is_read": true
 }
 ```
 
-### 6.4 Get Webhook Events
+### 7.4 Mark All Notifications as Read
 ```bash
-GET http://localhost:8000/webhooks/1/events/
+POST http://localhost:8000/api/v1/notifications/mark-all-read/
 Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+### 7.5 Get Unread Count
+```bash
+GET http://localhost:8000/api/v1/notifications/unread-count/
+Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+**Expected Response:**
+```json
+{
+    "unread_count": 5
+}
 ```
 
 ---
@@ -321,7 +404,7 @@ Authorization: Bearer YOUR_ACCESS_TOKEN
 ### Using cURL
 ```bash
 # Example: Register a user
-curl -X POST http://localhost:8000/auth/register/ \
+curl -X POST http://localhost:8000/api/v1/auth/register/ \
   -H "Content-Type: application/json" \
   -d '{"email": "test@example.com", "password": "testpass123", "first_name": "Test", "last_name": "User"}'
 ```
@@ -336,7 +419,7 @@ curl -X POST http://localhost:8000/auth/register/ \
 import requests
 
 # Register user
-response = requests.post('http://localhost:8000/auth/register/', json={
+response = requests.post('http://localhost:8000/api/v1/auth/register/', json={
     'email': 'test@example.com',
     'password': 'testpass123',
     'first_name': 'Test',

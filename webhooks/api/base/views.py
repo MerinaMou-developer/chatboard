@@ -34,7 +34,7 @@ class WebhookViewSet(viewsets.ModelViewSet):
             raise PermissionDenied("Only org admins can create webhooks.")
         serializer.save()
     
-    @action(detail=True, methods=['post'], url_path='test')
+    @action(detail=True, methods=['post'])
     def test_webhook(self, request, pk=None):
         """Send a test webhook to verify configuration."""
         webhook = self.get_object()
@@ -65,7 +65,7 @@ class WebhookViewSet(viewsets.ModelViewSet):
             'webhook_url': webhook.url
         }, status=status.HTTP_200_OK)
     
-    @action(detail=True, methods=['get'], url_path='events')
+    @action(detail=True, methods=['get'])
     def webhook_events(self, request, pk=None):
         """List recent webhook delivery attempts."""
         webhook = self.get_object()

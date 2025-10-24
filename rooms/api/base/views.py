@@ -40,6 +40,41 @@ class RoomViewSet(viewsets.ModelViewSet):
         room = serializer.save(created_by=self.request.user)
         RoomMember.objects.get_or_create(room=room, user=self.request.user)
 
+    @action(detail=True, methods=["post"], url_path="join")
+    def join(self, request, pk=None):
+        """Join a room."""
+        room = self.get_object()
+        member, created = RoomMember.objects.get_or_create(
+            room=room,
+            user=request.user
+        )
+        if created:
+            return Response(
+                {"detail": "Successfully joined the room"},
+                status=status.HTTP_201_CREATED
+            )
+        return Response(
+            {"detail": "Already a member of this room"},
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=["post"], url_path="leave")
+    def leave(self, request, pk=None):
+        """Leave a room."""
+        deleted_count, _ = RoomMember.objects.filter(
+            room_id=pk,
+            user=request.user
+        ).delete()
+        if deleted_count > 0:
+            return Response(
+                {"detail": "Successfully left the room"},
+                status=status.HTTP_200_OK
+            )
+        return Response(
+            {"detail": "You are not a member of this room"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
     @action(detail=True, methods=["get"], url_path="members")
     def members(self, request, pk=None):
         # Only members can see members

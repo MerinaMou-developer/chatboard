@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import permissions, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 from orgs.models import Organization, OrganizationMember, OrganizationInvite
 from .serializers import (
@@ -39,6 +40,11 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         qs = OrganizationMember.objects.filter(org_id=pk).select_related("user")
         return Response(MemberSerializer(qs, many=True).data)
 
+    @extend_schema(
+        request=InviteCreateSerializer,
+        responses={201: InviteCreateSerializer},
+        description="Invite a user to the organization by email"
+    )
     @action(
         detail=True,
         methods=["post"],
@@ -56,6 +62,11 @@ class OrganizationViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED
         )
 
+    @extend_schema(
+        request=InviteAcceptSerializer,
+        responses={200: {"type": "object", "properties": {"detail": {"type": "string"}, "org_id": {"type": "integer"}, "role": {"type": "string"}}}},
+        description="Accept an organization invitation using the invite token"
+    )
     @action(
         detail=False,
         methods=["post"],
@@ -80,7 +91,7 @@ class OrganizationViewSet(viewsets.ModelViewSet):
             org=inv.org, user=request.user, defaults={"role": inv.role}
         )
         if not created and mem.role != inv.role:
-            # Don’t silently downgrade; keep current role
+            # Don't silently downgrade; keep current role
             pass
 
         inv.accepted_at = timezone.now()
