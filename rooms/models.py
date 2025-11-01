@@ -8,9 +8,17 @@ from orgs.models import Organization
 User = settings.AUTH_USER_MODEL
 
 class Room(models.Model):
+    PUBLIC, PRIVATE, MANAGER_ONLY = "PUBLIC", "PRIVATE", "MANAGER_ONLY"
+    ACCESS_CHOICES = [
+        (PUBLIC, "All org members"),
+        (PRIVATE, "Invite only"),
+        (MANAGER_ONLY, "Manager/Admin only")
+    ]
+    
     org = models.ForeignKey(Organization, null=True, blank=True, on_delete=models.SET_NULL, related_name="rooms")
     name = models.CharField(max_length=120)
     is_dm = models.BooleanField(default=False)
+    access_level = models.CharField(max_length=12, choices=ACCESS_CHOICES, default=PUBLIC)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="created_rooms")
     created_at = models.DateTimeField(auto_now_add=True)
 

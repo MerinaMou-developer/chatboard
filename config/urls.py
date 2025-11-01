@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.urls import include, path, re_path
+from django.conf import settings
+from django.conf.urls.static import static
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from django.http import JsonResponse
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
@@ -39,3 +41,7 @@ urlpatterns = [
     # Optional: return 404 for future versions until implemented
     re_path(r"^api/(?P<version>v[0-9]+)/", api_version_not_found),
 ]
+
+# Serve media files in development (for local file storage)
+if settings.DEBUG and not settings.USE_AWS_S3:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

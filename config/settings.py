@@ -124,7 +124,7 @@ from datetime import timedelta
 
 SIMPLE_JWT = {
     # Lifetimes
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=6),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 
     # Auth header: Authorization: Bearer <token>
@@ -165,13 +165,27 @@ CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://127.0.0.1:63
 
 AUTH_USER_MODEL = "accounts.User"
 
-# ---- AWS S3 Settings ----
-AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "")
-AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "")
-AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "chatboard-uploads")
-AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "us-east-1")
-AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
-AWS_DEFAULT_ACL = None
-AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=86400',
-}
+# ---- File Storage Configuration ----
+USE_AWS_S3 = bool(int(os.getenv("USE_AWS_S3", "0")))  # Set to "1" to use AWS S3, "0" for local storage
+
+if USE_AWS_S3:
+    # AWS S3 Settings (requires AWS account and credentials)
+    AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "")
+    AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "")
+    AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "chatboard-uploads")
+    AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "us-east-1")
+    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
+    AWS_DEFAULT_ACL = None
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
+    # Configure django-storages for S3 (optional - currently using presigned URLs)
+    # Uncomment below if you want Django to use S3 for FileField/ImageField automatically
+    # DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    # STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+else:
+    # Local file storage (FREE - for development/demo)
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
+    # Ensure media directory exists
+    os.makedirs(MEDIA_ROOT, exist_ok=True)

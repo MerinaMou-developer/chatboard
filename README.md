@@ -20,7 +20,7 @@
 ## ✨ Features
 
 ### 🔐 **Authentication & Security**
-- **JWT Authentication** with refresh tokens (15min access, 7-day refresh)
+- **JWT Authentication** with refresh tokens (6-day access, 7-day refresh)
 - **Custom User Model** with email-based login
 - **Role-Based Access Control** (RBAC) with organization-scoped permissions
 - **WebSocket Authentication** with JWT token validation
@@ -34,14 +34,17 @@
 
 ### 💬 **Real-time Messaging**
 - **WebSocket Integration** with Django Channels + Redis
-- **Room-based Chat** with group messaging
+- **Room-based Chat** with group messaging with access level controls
+- **Auto-Join Logic** - New org members automatically join PUBLIC and MANAGER_ONLY rooms
 - **Direct Messages** (DMs) support
 - **Typing Indicators** and presence awareness
 - **Message Pagination** with cursor-based pagination
 - **Unread Counts** and read receipts
 
 ### 📁 **File Management**
-- **Presigned Upload URLs** with AWS S3 integration
+- **Flexible Storage**: AWS S3 or local storage (configurable, defaults to local for FREE)
+- **Presigned Upload URLs** for AWS S3 integration
+- **Direct Upload** for local storage
 - **File Type Validation** and size limits (100MB max)
 - **Automatic Cleanup** with 30-day expiration
 - **Secure File Access** with signed URLs

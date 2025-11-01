@@ -6,3 +6,7 @@ venv/
 .env
 .idea/
 .vscode/
+
+# Local file uploads
+media/
+staticfiles/
