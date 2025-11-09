@@ -22,5 +22,16 @@ class FileUpload(models.Model):
         ]
     
     def __str__(self):
-        return f"{self.filename} ({self.user.email})"
+        related_model = self._meta.get_field("user").related_model
+        try:
+            user = self.user
+        except related_model.DoesNotExist:
+            user = None
+
+        if user is not None:
+            user_identifier = getattr(user, "email", None) or getattr(user, "username", None) or str(self.user_id)
+        else:
+            user_identifier = str(self.user_id)
+
+        return f"{self.filename} ({user_identifier})"
 

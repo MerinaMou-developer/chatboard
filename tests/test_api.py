@@ -1,6 +1,7 @@
 import pytest
 import json
-from django.test import TestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
@@ -9,6 +10,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from orgs.models import Organization, OrganizationMember
 from rooms.models import Room, RoomMember
 from messages_app.models import Message
+from uploads.models import FileUpload
 
 User = get_user_model()
 
@@ -223,3 +225,27 @@ class UnreadCountsTestCase(APITestCase):
         # Check last_read_msg_id was updated
         self.membership.refresh_from_db()
         self.assertEqual(self.membership.last_read_msg_id, message.id)
+
+
+@override_settings(USE_AWS_S3=False)
+class UploadTestCase(APITestCase):
+    """Test file upload endpoint when using local storage."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            email="uploader@example.com",
+            password="testpass123",
+        )
+        token = RefreshToken.for_user(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token.access_token}")
+
+    def test_local_file_upload(self):
+        url = reverse("uploads_v1:uploads")
+        file_obj = SimpleUploadedFile("hello.txt", b"hello world", content_type="text/plain")
+
+        response = self.client.post(url, {"file": file_obj}, format="multipart")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIn("file_url", response.data)
+        self.assertTrue(response.data["file_url"].startswith("http"))
+        self.assertEqual(FileUpload.objects.count(), 1)

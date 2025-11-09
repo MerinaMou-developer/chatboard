@@ -428,7 +428,7 @@ Content-Type: application/json
 ```
 **🔐 Required Role:** Room MEMBER
 
-**Note:** `file_url` can be from AWS S3 or local storage (`/media/uploads/...`)
+**Note:** `file_url` can point to AWS S3 or the local media server (e.g. `http://localhost:8000/media/uploads/...`)
 
 ---
 
@@ -439,43 +439,31 @@ The app supports two storage modes (configured via `USE_AWS_S3` environment vari
 - **AWS S3** (requires AWS account) - Files stored in S3
 
 ### 5.1 Upload File (Local Storage)
-
-**Option A: Using /direct/ endpoint (Recommended)**
 ```bash
-POST http://localhost:8000/api/v1/uploads/direct/
+POST http://localhost:8000/api/v1/uploads/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: multipart/form-data
 
 Form Data:
 - file: [your file]
-- filename: "document.pdf"
-```
-
-**Option B: Using /presign/ endpoint**
-```bash
-POST http://localhost:8000/api/v1/uploads/presign/
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: multipart/form-data
-
-Form Data:
-- file: [your file]
-- filename: "document.pdf"
+- filename: "document.pdf"   # optional, defaults to uploaded file name
 ```
 
 **Expected Response (Local Storage):**
 ```json
 {
-    "upload_id": "12345",
-    "file_url": "/media/uploads/user_id/filename.pdf",
-    "message": "File uploaded successfully"
+    "id": "0f9f1ff6-5c37-4fd8-9f41-9d25a522f0c5",
+    "filename": "document.pdf",
+    "file_size": 1024000,
+    "content_type": "application/pdf",
+    "file_url": "http://localhost:8000/media/uploads/1/41f5....pdf",
+    "uploaded_at": "2025-11-08T13:10:00Z"
 }
 ```
 
 ### 5.2 Get Presigned Upload URL (AWS S3)
-
-For AWS S3, first get a presigned URL, then upload to S3:
 ```bash
-POST http://localhost:8000/api/v1/uploads/presign/
+POST http://localhost:8000/api/v1/uploads/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
@@ -490,18 +478,22 @@ Content-Type: application/json
 **Expected Response (AWS S3):**
 ```json
 {
-    "upload_url": "https://s3.amazonaws.com/bucket/presigned-url",
-    "file_url": "https://s3.amazonaws.com/bucket/file-path",
-    "upload_id": "12345",
+    "id": "0f9f1ff6-5c37-4fd8-9f41-9d25a522f0c5",
+    "filename": "document.pdf",
+    "file_size": 1024000,
+    "content_type": "application/pdf",
+    "file_url": "https://your-bucket.s3.us-east-1.amazonaws.com/uploads/1/41f5....pdf",
+    "uploaded_at": "2025-11-08T13:10:00Z",
+    "upload_url": "https://s3.amazonaws.com/...presigned-url...",
     "expires_in": 3600
 }
 ```
 
-Then upload your file to the `upload_url` using PUT method.
+Then upload your file to the returned `upload_url` using the HTTP `PUT` method when `USE_AWS_S3=1`.
 
 ### 5.3 List User's Uploads
 ```bash
-GET http://localhost:8000/api/v1/uploads/my-uploads/
+GET http://localhost:8000/api/v1/uploads/
 Authorization: Bearer YOUR_ACCESS_TOKEN
 ```
 **🔐 Required Role:** Any authenticated user

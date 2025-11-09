@@ -13,7 +13,7 @@ class RoomConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         """Connect to WebSocket with JWT authentication."""
         self.room_id = self.scope['url_route']['kwargs']['room_id']
-        self.room_group_name = f"room:{self.room_id}"
+        self.room_group_name = f"room_{self.room_id}"
         
         # Get token from query parameters
         query_params = self.scope.get('query_string', b'').decode()

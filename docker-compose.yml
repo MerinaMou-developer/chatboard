@@ -53,6 +53,7 @@ services:
       redis:
         condition: service_healthy
     volumes:
+      - .:/app
       - static_volume:/app/staticfiles
       - media_volume:/app/media
     command: >
@@ -82,6 +83,7 @@ services:
       redis:
         condition: service_healthy
     volumes:
+      - .:/app
       - static_volume:/app/staticfiles
       - media_volume:/app/media
     command: celery -A config.celery worker --loglevel=info
@@ -108,6 +110,7 @@ services:
       redis:
         condition: service_healthy
     volumes:
+      - .:/app
       - static_volume:/app/staticfiles
       - media_volume:/app/media
     command: celery -A config.celery beat --loglevel=info
